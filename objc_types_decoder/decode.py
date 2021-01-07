@@ -125,15 +125,16 @@ def description_for_simple(type_dictionary):
 
 
 def description_for_struct(type_dictionary):
-    desc = 'struct ' + type_dictionary['name'] + '{ '
+    name = (type_dictionary['name'] + ' ') if type_dictionary['name'] != '?' else ''
+    desc = 'struct ' + name + '{ '
     for i, type_ in enumerate(type_dictionary['types']):
-        desc += description_for_type(type_) + f' x{i};'
+        desc += description_for_type(type_) + f' x{i}; '
     desc += '}'
     return desc
 
 
 def description_for_array(type_dictionary):
-    return description_for_type(type_dictionary['type']) + f' x[{type_dictionary["count"]}];'
+    return description_for_type(type_dictionary['type']) + f' x[{type_dictionary["count"]}]'
 
 
 def description_for_name(type_dictionary):
