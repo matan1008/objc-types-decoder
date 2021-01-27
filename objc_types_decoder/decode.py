@@ -78,7 +78,9 @@ def decode_array(encoded: str):
             digits += tail[i]
         else:
             break
-    decoded = decode_type_recursive(tail[len(digits):])
+    tail = tail[len(digits):]
+    # If the type is omitted, assume 'void *'
+    decoded = decode_type_recursive(tail if tail else '^v')
     return {'kind': 'array', 'count': digits, 'type': decoded, 'tail': decoded['tail']}
 
 

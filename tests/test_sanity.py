@@ -53,6 +53,7 @@ def test_decoding_pointer(encoded, decoded):
 
 @pytest.mark.parametrize('encoded, decoded', [
     ('[12^f]', 'float * x[12]'),
+    ('[4]', 'void * x[4]'),
 ])
 def test_decoding_array(encoded, decoded):
     assert decode(encoded) == decoded
