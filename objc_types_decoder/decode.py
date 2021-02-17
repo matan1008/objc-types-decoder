@@ -160,3 +160,8 @@ def description_for_type(type_dictionary):
 
 def decode(encoded):
     return description_for_type(decode_type_recursive(encoded))
+
+
+def decode_with_tail(encoded):
+    decoded = decode_type_recursive(encoded)
+    return description_for_type(decoded), decoded.get('tail', '')
