@@ -71,17 +71,18 @@ def decode_struct(encoded: str):
 
 
 def decode_array(encoded: str):
-    tail = encoded[1:-1]
+    close_index = index_of_closing_char(encoded, '[', ']')
+    array_str = encoded[1:close_index]
     digits = ''
-    for i in range(len(tail)):
-        if tail[i].isdigit():
-            digits += tail[i]
+    for i in range(len(array_str)):
+        if array_str[i].isdigit():
+            digits += array_str[i]
         else:
             break
-    tail = tail[len(digits):]
+    type_encoded = array_str[len(digits):]
     # If the type is omitted, assume 'void *'
-    decoded = decode_type_recursive(tail if tail else '^v')
-    return {'kind': 'array', 'count': digits, 'type': decoded, 'tail': decoded['tail']}
+    decoded = decode_type_recursive(type_encoded if type_encoded else '^v')
+    return {'kind': 'array', 'count': digits, 'type': decoded, 'tail': encoded[close_index + 1:]}
 
 
 def decode_name(encoded):
@@ -130,7 +131,10 @@ def description_for_struct(type_dictionary):
     name = (type_dictionary['name'] + ' ') if type_dictionary['name'] != '?' else ''
     desc = 'struct ' + name + '{ '
     for i, type_ in enumerate(type_dictionary['types']):
-        desc += description_for_type(type_) + f' x{i}; '
+        if type_['kind'] == 'array':
+            desc += description_for_type(type_['type']) + f' x{i}[{type_["count"]}]; '
+        else:
+            desc += description_for_type(type_) + f' x{i}; '
     desc += '}'
     return desc
 

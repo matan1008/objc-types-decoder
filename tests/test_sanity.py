@@ -37,6 +37,7 @@ def test_decoding_block():
     ('{example=}', 'struct example { }'),
     ('{?=}', 'struct { }'),
     ('{?=i}', 'struct { int x0; }'),
+    ('^{tmp=I[2:]I}', 'struct tmp { unsigned int x0; SEL x1[2]; unsigned int x2; } *'),
     ('{bStruct={aStruct=iq@}{aStruct=iq@}}', 'struct bStruct { struct aStruct { int x0; long long x1; id x2; } x0;'
                                              ' struct aStruct { int x0; long long x1; id x2; } x1; }'),
 ])
