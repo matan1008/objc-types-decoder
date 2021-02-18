@@ -37,6 +37,8 @@ def test_decoding_block():
     ('{example=}', 'struct example { }'),
     ('{?=}', 'struct { }'),
     ('{?=i}', 'struct { int x0; }'),
+    ('^{tmp=I[2:]b16b16*^{__CFString}}',
+     'struct tmp { unsigned int x0; SEL x1[2]; int x2 : 16; int x3 : 16; char * x4; struct  { __CFString x0; } * x5; } *'),
     ('^{tmp=I[2:]I}', 'struct tmp { unsigned int x0; SEL x1[2]; unsigned int x2; } *'),
     ('{bStruct={aStruct=iq@}{aStruct=iq@}}', 'struct bStruct { struct aStruct { int x0; long long x1; id x2; } x0;'
                                              ' struct aStruct { int x0; long long x1; id x2; } x1; }'),
@@ -49,6 +51,13 @@ def test_decoding_struct(encoded, decoded):
     ('^{example=@*i}', 'struct example { id x0; char * x1; int x2; } *'),
 ])
 def test_decoding_pointer(encoded, decoded):
+    assert decode(encoded) == decoded
+
+
+@pytest.mark.parametrize('encoded, decoded', [
+    ('b16', 'int x : 16'),
+])
+def test_decoding_bitfield(encoded, decoded):
     assert decode(encoded) == decoded
 
 
