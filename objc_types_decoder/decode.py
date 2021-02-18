@@ -17,7 +17,6 @@ SIMPLE_TYPES = {
     '@': 'id',
     '#': 'Class',
     ':': 'SEL',
-    'b': 'int',  # TODO: parse to bit fields
     '?': '<unknown-type>',
 }
 
@@ -38,6 +37,16 @@ def index_of_closing_char(s: str, open_: str, close: str) -> int:
         depth += {open_: 1, close: -1}.get(s[i], 0)
         if not depth:
             return i
+
+
+def get_digits(s: str):
+    digits = ''
+    for i in range(len(s)):
+        if s[i].isdigit():
+            digits += s[i]
+        else:
+            break
+    return digits
 
 
 # Decoders
@@ -73,12 +82,7 @@ def decode_struct(encoded: str):
 def decode_array(encoded: str):
     close_index = index_of_closing_char(encoded, '[', ']')
     array_str = encoded[1:close_index]
-    digits = ''
-    for i in range(len(array_str)):
-        if array_str[i].isdigit():
-            digits += array_str[i]
-        else:
-            break
+    digits = get_digits(array_str)
     type_encoded = array_str[len(digits):]
     # If the type is omitted, assume 'void *'
     decoded = decode_type_recursive(type_encoded if type_encoded else '^v')
@@ -88,6 +92,12 @@ def decode_array(encoded: str):
 def decode_name(encoded):
     close_index = encoded.index('"', 1)
     return {'kind': 'name', 'name': encoded[1:close_index], 'tail': encoded[close_index + 1:]}
+
+
+def decode_bit_fields(encoded):
+    count_str = encoded[len('b'):]
+    digits = get_digits(count_str)
+    return {'kind': 'bitfield', 'count': digits, 'tail': count_str[len(digits):]}
 
 
 def decode_type_recursive(encoded: str):
@@ -103,6 +113,8 @@ def decode_type_recursive(encoded: str):
         return decode_array(encoded)
     elif encoded[0] == '"':
         return decode_name(encoded)
+    elif encoded[0] == 'b':
+        return decode_bit_fields(encoded)
     return decode_name(f'"{encoded}"')
 
 
@@ -133,6 +145,8 @@ def description_for_struct(type_dictionary):
     for i, type_ in enumerate(type_dictionary['types']):
         if type_['kind'] == 'array':
             desc += description_for_type(type_['type']) + f' x{i}[{type_["count"]}]; '
+        elif type_['kind'] == 'bitfield':
+            desc += f'int x{i} : {type_["count"]}; '
         else:
             desc += description_for_type(type_) + f' x{i}; '
     desc += '}'
@@ -147,6 +161,10 @@ def description_for_name(type_dictionary):
     return type_dictionary['name']
 
 
+def description_for_bitfield(type_dictionary):
+    return f'int x : {type_dictionary["count"]}'
+
+
 def description_for_type(type_dictionary):
     return {
         'pointer': description_for_pointer,
@@ -154,7 +172,8 @@ def description_for_type(type_dictionary):
         'simple': description_for_simple,
         'struct': description_for_struct,
         'array': description_for_array,
-        'name': description_for_name
+        'name': description_for_name,
+        'bitfield': description_for_bitfield,
     }[type_dictionary['kind']](type_dictionary)
 
 
