@@ -56,6 +56,11 @@ def decode_pointer(encoded):
     return {'kind': 'pointer', 'type': decoded, 'tail': decoded['tail']}
 
 
+def decode_complex(encoded):
+    decoded = decode_type_recursive(encoded[1:])
+    return {'kind': 'complex', 'type': decoded, 'tail': decoded['tail']}
+
+
 def decode_type_specifier(encoded):
     decoded = decode_type_recursive(encoded[1:])
     return {'kind': 'specifier', 'type': decoded, 'tail': decoded['tail'], 'specifier': TYPE_SPECIFIERS[encoded[0]]}
@@ -107,6 +112,8 @@ def decode_type_recursive(encoded: str):
         return decode_type_specifier(encoded)
     elif encoded[0] == '^':
         return decode_pointer(encoded)
+    elif encoded[0] == 'j':
+        return decode_complex(encoded)
     elif encoded[0] == '{':
         return decode_struct(encoded)
     elif encoded[0] == '[':
@@ -122,6 +129,10 @@ def decode_type_recursive(encoded: str):
 
 def description_for_pointer(type_dictionary):
     return description_for_type(type_dictionary['type']) + ' *'
+
+
+def description_for_complex(type_dictionary):
+    return description_for_type(type_dictionary['type']) + ' complex'
 
 
 def description_for_specifier(type_dictionary):
@@ -168,6 +179,7 @@ def description_for_bitfield(type_dictionary):
 def description_for_type(type_dictionary):
     return {
         'pointer': description_for_pointer,
+        'complex': description_for_complex,
         'specifier': description_for_specifier,
         'simple': description_for_simple,
         'struct': description_for_struct,
