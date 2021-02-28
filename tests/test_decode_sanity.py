@@ -50,8 +50,16 @@ def test_decoding_struct(encoded, decoded):
 
 @pytest.mark.parametrize('encoded, decoded', [
     ('^{example=@*i}', 'struct example { id x0; char * x1; int x2; } *'),
+    ('^jf', 'float complex *'),
 ])
 def test_decoding_pointer(encoded, decoded):
+    assert decode(encoded) == decoded
+
+
+@pytest.mark.parametrize('encoded, decoded', [
+    ('jd', 'double complex'),
+])
+def test_decoding_complex(encoded, decoded):
     assert decode(encoded) == decoded
 
 
