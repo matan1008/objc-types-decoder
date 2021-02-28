@@ -2,6 +2,23 @@
 
 A type decoder for Objective-C types.
 
+It translates the encoded Objective-C type notation, the notation that the `@encode` function returns, into a readable
+form that tries to be as close as possible to the original type definition.
+
+For example, lets look at the following `@encode`:
+
+```objective-c
+NSLog(@"%s", @encode(float **)); // "^^f" will be printed.
+```
+
+Using our decoder, we can "reverse" the process:
+
+```python
+from objc_types_decoder.decode import decode
+
+print(decode('^^f'))  # 'float * *' will be printed.
+```
+
 ## Installation
 
 In order to install this package, just use a regular `pip` installation:
