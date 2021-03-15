@@ -105,6 +105,21 @@ def decode_bit_fields(encoded):
     return {'kind': 'bitfield', 'count': digits, 'tail': count_str[len(digits):]}
 
 
+def decode_union(encoded: str):
+    close_index = index_of_closing_char(encoded, '(', ')')
+    long_tail = encoded[close_index + 1:]
+    union_str = encoded[1:close_index]
+    if '=' not in union_str:
+        return {'kind': 'union', 'types': None, 'name': union_str, 'tail': long_tail}
+    name, union_str = union_str.split('=', 1)
+    types_in_union = []
+    while union_str:
+        decoded = decode_type_recursive(union_str)
+        types_in_union.append(decoded)
+        union_str = decoded['tail']
+    return {'kind': 'union', 'types': types_in_union, 'name': name, 'tail': long_tail}
+
+
 def decode_type_recursive(encoded: str):
     if encoded[0] in SIMPLE_TYPES:
         return {'kind': 'simple', 'type': SIMPLE_TYPES[encoded[0]], 'tail': encoded[1:]}
@@ -122,6 +137,8 @@ def decode_type_recursive(encoded: str):
         return decode_name(encoded)
     elif encoded[0] == 'b':
         return decode_bit_fields(encoded)
+    elif encoded[0] == '(':
+        return decode_union(encoded)
     return decode_name(f'"{encoded}"')
 
 
@@ -164,6 +181,23 @@ def description_for_struct(type_dictionary):
     return desc
 
 
+def description_for_union(type_dictionary):
+    name = type_dictionary['name'] if type_dictionary['name'] != '?' else ''
+    desc = 'union ' + name
+    if type_dictionary['types'] is None:
+        return desc
+    desc = desc.rstrip(' ') + ' { '
+    for i, type_ in enumerate(type_dictionary['types']):
+        if type_['kind'] == 'array':
+            desc += description_for_type(type_['type']) + f' x{i}[{type_["count"]}]; '
+        elif type_['kind'] == 'bitfield':
+            desc += f'int x{i} : {type_["count"]}; '
+        else:
+            desc += description_for_type(type_) + f' x{i}; '
+    desc += '}'
+    return desc
+
+
 def description_for_array(type_dictionary):
     return description_for_type(type_dictionary['type']) + f' x[{type_dictionary["count"]}]'
 
@@ -186,6 +220,7 @@ def description_for_type(type_dictionary):
         'array': description_for_array,
         'name': description_for_name,
         'bitfield': description_for_bitfield,
+        'union': description_for_union,
     }[type_dictionary['kind']](type_dictionary)
 
 

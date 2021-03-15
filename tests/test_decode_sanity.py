@@ -76,3 +76,20 @@ def test_decoding_bitfield(encoded, decoded):
 ])
 def test_decoding_array(encoded, decoded):
     assert decode(encoded) == decoded
+
+
+@pytest.mark.parametrize('encoded, decoded', [
+    ('(example=^v*i)', 'union example { void * x0; char * x1; int x2; }'),
+    ('(NSObject=#)', 'union NSObject { Class x0; }'),
+    ('(example=)', 'union example { }'),
+    ('(example)', 'union example'),
+    ('(?=)', 'union { }'),
+    ('(?=i)', 'union { int x0; }'),
+    ('^(tmp=I[2:]b16b16*^(Data))',
+     'union tmp { unsigned int x0; SEL x1[2]; int x2 : 16; int x3 : 16; char * x4; union Data * x5; } *'),
+    ('^(tmp=I[2:]I)', 'union tmp { unsigned int x0; SEL x1[2]; unsigned int x2; } *'),
+    ('(bStruct={aStruct=iq@}(aStruct=iq@))', 'union bStruct { struct aStruct { int x0; long long x1; id x2; } x0;'
+                                             ' union aStruct { int x0; long long x1; id x2; } x1; }'),
+])
+def test_decoding_union(encoded, decoded):
+    assert decode(encoded) == decoded
