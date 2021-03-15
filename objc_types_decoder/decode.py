@@ -66,22 +66,27 @@ def decode_type_specifier(encoded):
     return {'kind': 'specifier', 'type': decoded, 'tail': decoded['tail'], 'specifier': TYPE_SPECIFIERS[encoded[0]]}
 
 
-def decode_struct(encoded: str):
-    close_index = index_of_closing_char(encoded, '{', '}')
-    struct_str = encoded[1:close_index]
-    try:
-        name = struct_str[:struct_str.index('=')]
-    except ValueError:
-        name = ''
-    else:
-        struct_str = struct_str[len(name) + 1:]
+def decode_fielded_type(encoded, kind, open, close):
+    close_index = index_of_closing_char(encoded, open, close)
     long_tail = encoded[close_index + 1:]
-    types_in_struct = []
-    while struct_str:
-        decoded = decode_type_recursive(struct_str)
-        types_in_struct.append(decoded)
-        struct_str = decoded['tail']
-    return {'kind': 'struct', 'types': types_in_struct, 'name': name, 'tail': long_tail}
+    type_str = encoded[1:close_index]
+    if '=' not in type_str:
+        return {'kind': kind, 'types': None, 'name': type_str, 'tail': long_tail}
+    name, type_str = type_str.split('=', 1)
+    types_in_str = []
+    while type_str:
+        decoded = decode_type_recursive(type_str)
+        types_in_str.append(decoded)
+        type_str = decoded['tail']
+    return {'kind': kind, 'types': types_in_str, 'name': name, 'tail': long_tail}
+
+
+def decode_struct(encoded: str):
+    return decode_fielded_type(encoded, 'struct', '{', '}')
+
+
+def decode_union(encoded: str):
+    return decode_fielded_type(encoded, 'union', '(', ')')
 
 
 def decode_array(encoded: str):
@@ -103,21 +108,6 @@ def decode_bit_fields(encoded):
     count_str = encoded[len('b'):]
     digits = get_digits(count_str)
     return {'kind': 'bitfield', 'count': digits, 'tail': count_str[len(digits):]}
-
-
-def decode_union(encoded: str):
-    close_index = index_of_closing_char(encoded, '(', ')')
-    long_tail = encoded[close_index + 1:]
-    union_str = encoded[1:close_index]
-    if '=' not in union_str:
-        return {'kind': 'union', 'types': None, 'name': union_str, 'tail': long_tail}
-    name, union_str = union_str.split('=', 1)
-    types_in_union = []
-    while union_str:
-        decoded = decode_type_recursive(union_str)
-        types_in_union.append(decoded)
-        union_str = decoded['tail']
-    return {'kind': 'union', 'types': types_in_union, 'name': name, 'tail': long_tail}
 
 
 def decode_type_recursive(encoded: str):
@@ -167,23 +157,9 @@ def description_for_simple(type_dictionary):
     return type_dictionary['type']
 
 
-def description_for_struct(type_dictionary):
-    name = (type_dictionary['name'] + ' ') if type_dictionary['name'] != '?' else ''
-    desc = 'struct ' + name + '{ '
-    for i, type_ in enumerate(type_dictionary['types']):
-        if type_['kind'] == 'array':
-            desc += description_for_type(type_['type']) + f' x{i}[{type_["count"]}]; '
-        elif type_['kind'] == 'bitfield':
-            desc += f'int x{i} : {type_["count"]}; '
-        else:
-            desc += description_for_type(type_) + f' x{i}; '
-    desc += '}'
-    return desc
-
-
-def description_for_union(type_dictionary):
+def description_for_fielded_type(type_dictionary, type_name):
     name = type_dictionary['name'] if type_dictionary['name'] != '?' else ''
-    desc = 'union ' + name
+    desc = f'{type_name} ' + name
     if type_dictionary['types'] is None:
         return desc
     desc = desc.rstrip(' ') + ' { '
@@ -196,6 +172,14 @@ def description_for_union(type_dictionary):
             desc += description_for_type(type_) + f' x{i}; '
     desc += '}'
     return desc
+
+
+def description_for_struct(type_dictionary):
+    return description_for_fielded_type(type_dictionary, 'struct')
+
+
+def description_for_union(type_dictionary):
+    return description_for_fielded_type(type_dictionary, 'union')
 
 
 def description_for_array(type_dictionary):

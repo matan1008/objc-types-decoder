@@ -35,11 +35,11 @@ def test_decoding_block():
     ('{example=@*i}', 'struct example { id x0; char * x1; int x2; }'),
     ('{NSObject=#}', 'struct NSObject { Class x0; }'),
     ('{example=}', 'struct example { }'),
+    ('{example}', 'struct example'),
     ('{?=}', 'struct { }'),
     ('{?=i}', 'struct { int x0; }'),
     ('^{tmp=I[2:]b16b16*^{__CFString}}',
-     ('struct tmp { unsigned int x0; SEL x1[2]; int x2 : 16; int x3 : 16; char * x4;'
-      ' struct  { __CFString x0; } * x5; } *')),
+     'struct tmp { unsigned int x0; SEL x1[2]; int x2 : 16; int x3 : 16; char * x4; struct __CFString * x5; } *'),
     ('^{tmp=I[2:]I}', 'struct tmp { unsigned int x0; SEL x1[2]; unsigned int x2; } *'),
     ('{bStruct={aStruct=iq@}{aStruct=iq@}}', 'struct bStruct { struct aStruct { int x0; long long x1; id x2; } x0;'
                                              ' struct aStruct { int x0; long long x1; id x2; } x1; }'),
