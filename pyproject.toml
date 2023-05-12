@@ -1,0 +1,42 @@
+[project]
+name = "objc_types_decoder"
+version = "0.0.5"
+description = "A type decoder for Objective-C types"
+readme = "README.md"
+requires-python = ">=3.7"
+license = { file = "LICENSE" }
+keywords = ["ios", "Objective-C"]
+authors = [
+    { name = "matan", email = "matan1008@gmail.com" }
+]
+maintainers = [
+    { name = "matan", email = "matan1008@gmail.com" }
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3 :: Only",
+]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[project.urls]
+"Homepage" = "https://github.com/matan1008/objc-types-decoder"
+"Bug Reports" = "https://github.com/matan1008/objc-types-decoder/issues"
+
+[project.scripts]
+objc_types_decoder = "objc_types_decoder.__main__:main"
+
+[tool.setuptools.packages.find]
+exclude = ["tests*"]
+
+[build-system]
+requires = ["setuptools>=43.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
