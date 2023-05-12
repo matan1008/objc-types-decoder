@@ -1,6 +1,6 @@
 [project]
 name = "objc_types_decoder"
-version = "0.0.4"
+version = "0.0.5"
 description = "A type decoder for Objective-C types"
 readme = "README.md"
 requires-python = ">=3.7"
