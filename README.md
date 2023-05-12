@@ -1,6 +1,8 @@
 # objc-types-decoder
 
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/matan1008/objc-types-decoder.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/matan1008/objc-types-decoder/context:python)
+[![Python application](https://github.com/matan1008/objc-types-decoder/workflows/Python%20application/badge.svg)](https://github.com/matan1008/objc-types-decoder/actions/workflows/python-app.yml "Python application action")
+[![Pypi version](https://img.shields.io/pypi/v/objc-types-decoder.svg)](https://pypi.org/project/objc-types-decoder/ "PyPi package")
+[![Downloads](https://static.pepy.tech/personalized-badge/objc-types-decoder?period=total&units=none&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/objc-types-decoder)
 
 
 A type decoder for Objective-C types.
